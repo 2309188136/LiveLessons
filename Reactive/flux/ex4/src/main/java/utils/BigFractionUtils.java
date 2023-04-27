@@ -231,4 +231,81 @@ public class BigFractionUtils {
             // Pass the StringBuffer.
             sb);
     }
+
+    /**
+     * Sort the {@link List} in parallel using quicksort and heapsort
+     * and then store and print the results in the {@link
+     * StringBuffer} parameter.
+     */
+    public static Mono<Void> sortAndPrintList(List<BigFraction> list,
+                                              StringBuffer sb) {
+        // Quick sort the list asynchronously.
+        var quickSortM = Mono
+                // Use the fromCallable() factory method to obtain the
+                // results of quick sorting the list.
+                .fromCallable(() -> quickSort(list))
+
+                // Use subscribeOn() to run all the processing in the
+                // parallel thread pool.
+                .subscribeOn(Schedulers.parallel());
+
+        // Heap sort the list asynchronously.
+        var heapSortM =  Mono
+                // Use the fromCallable() factory method to obtain the
+                // results of heap sorting the list.
+                .fromCallable(() -> heapSort(list))
+
+                // Use subscribeOn() to run all the processing in the
+                // parallel thread pool.
+                .subscribeOn(Schedulers.parallel());
+
+        // Display the results as mixed fractions.
+        Consumer<List<BigFraction>> displayList = sortedList -> {
+            // Iterate through each BigFraction in the sorted list.
+            sortedList.forEach(fraction ->
+                    sb.append("\n     "
+                            + fraction.toMixedString()));
+            sb.append("\n");
+            display(sb.toString());
+        };
+
+        return Mono
+                // Use firstWithSignal() to select the result of whichever
+                // sort finishes first and use it to print the sorted
+                // list.
+                .firstWithSignal(quickSortM,
+                        heapSortM)
+
+                // Use doOnSuccess() to display the first sorted list.
+                .doOnSuccess(displayList)
+
+                // Use then() to return an empty mono to synchronize with
+                // the AsyncTaskBarrier framework.
+                .then();
+    }
+
+    /**
+     * Perform a quick sort on the {@code list}.
+     */
+    public static List<BigFraction> quickSort(List<BigFraction> list) {
+        var copy = new ArrayList<>(list);
+
+        // Order the list with quick sort.
+        Collections.sort(copy);
+
+        return copy;
+    }
+
+    /*
+     * Perform a heap sort on the {@code list}.
+     */
+    public static List<BigFraction> heapSort(List<BigFraction> list) {
+        var copy = new ArrayList<>(list);
+
+        // Order the list with heap sort.
+        HeapSort.sort(copy);
+
+        return copy;
+    }
+
 }

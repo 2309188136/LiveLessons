@@ -1,0 +1,2 @@
+set jdk to jdk16
+set gradle jdk to jdk16

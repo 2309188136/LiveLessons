@@ -8,8 +8,11 @@ import utils.BlockingSubscriber;
 import utils.Emitter;
 
 import java.util.Random;
+import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Stream;
 
 import static utils.BigFractionUtils.*;
+import static utils.MonosCollector.toMono;
 
 /**
  * This class shows how to apply Project Reactor features
@@ -172,5 +175,18 @@ public class FluxEx {
         // empty mono to indicate to the AsyncTaskBarrier that all the
         // processing is done.
         return blockingSubscriber.await();
+    }
+
+    public static Mono<Void> testFractionMultiplicationsStream() {
+
+        StringBuffer sb = new StringBuffer(">> Calling testFractionMultiplicationsStream()\n");
+        sb.append("      Printing sorted results:");
+
+       return Stream.generate(()-> makeBigFraction(sRANDOM, false)).limit(sMAX_FRACTIONS)
+                .map(unreducedFraction-> reduceAndMultiplyFraction(unreducedFraction,
+                        Schedulers.fromExecutor(ForkJoinPool.commonPool()), sb))
+                .collect(toMono())
+               .flatMap(list -> BigFractionUtils.sortAndPrintList(list,sb));
+
     }
 }
