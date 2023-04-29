@@ -27,6 +27,7 @@ public class ex4 {
         // A test of BigFraction multiplication using an asynchronous
         // Flux stream with an overflow strategy and a blocking
         // Subscriber implementation.
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsStream);
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsOverflowStrategy);
 
         @SuppressWarnings("ConstantConditions")
