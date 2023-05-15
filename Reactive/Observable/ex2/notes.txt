@@ -1,0 +1,2 @@
+requires java 18
+and gradle java jvm 18
